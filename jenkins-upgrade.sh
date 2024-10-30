@@ -26,4 +26,6 @@ helm upgrade jenkins edu/jenkins --version 2.7.1 \
 --set master.serviceType=LoadBalancer \
 --set master.servicePort=80 \
 --set master.jenkinsOpts="$jkopt1 $jkopt2" \
---set master.javaOpts="$jvopt1 $jvopt2 $jvopt3"
+--set master.javaOpts="$jvopt1 $jvopt2 $jvopt3" \
+--set master.automountServiceAccountToken=true \
+--history-max 3

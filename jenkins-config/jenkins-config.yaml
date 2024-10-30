@@ -40,9 +40,16 @@ jenkins:
                   - "sh"
                   - "-c"
                   - |
-                    # 필요한 라이브러리 설치
+                    # 호스트의 docker 그룹 GID를 가져옵니다.
+                    DOCKER_GID=$(stat -c '%g' /var/run/docker.sock) && \
+                    # docker 그룹을 생성합니다.
+                    groupadd -for -g ${DOCKER_GID} docker && \
+                    # jenkins 사용자를 docker 그룹에 추가합니다.
+                    usermod -aG docker jenkins && \
+                    # 필요한 라이브러리를 설치합니다.
                     apt-get update && \
                     apt-get install -y libltdl7 && \
+                    # 에이전트 프로세스를 실행합니다.
                     exec /usr/local/bin/jenkins-agent "\${computer.jnlpmac}" "\${computer.name}"
                 args: ""
                 envVars:
