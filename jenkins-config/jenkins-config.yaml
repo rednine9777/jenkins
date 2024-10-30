@@ -27,24 +27,15 @@ jenkins:
             podRetention: "never"
             hostNetwork: false
             yamlMergeStrategy: "override"
+            # 권한 설정을 위한 securityContext 추가
             securityContext:
-              runAsUser: 1000
-              runAsGroup: 1000
+              runAsUser: 0       # root 사용자로 실행
+              runAsGroup: 0
             containers:
               - name: "jnlp"
-                image: "jenkins/inbound-agent:4.3-4"
+                image: "jenkinsci/docker-inbound-agent:latest"  # Docker가 포함된 에이전트 이미지
                 workingDir: "/home/jenkins"
-                command:
-                  - "sh"
-                  - "-c"
-                  - |
-                    apt-get update && \
-                    apt-get install -y docker.io && \
-                    DOCKER_GID=$(stat -c '%g' /var/run/docker.sock) && \
-                    groupadd -for -g ${DOCKER_GID} docker && \
-                    usermod -aG docker jenkins && \
-                    exec /usr/local/bin/jenkins-agent "\${computer.jnlpmac}" "\${computer.name}"
-                args: ""
+                args: "${computer.jnlpmac} ${computer.name}"
                 envVars:
                   - envVar:
                       key: "JENKINS_URL"
@@ -55,10 +46,10 @@ jenkins:
                 resourceRequestMemory: "512Mi"
             volumes:
               - hostPathVolume:
-                  hostPath: "/var/run/docker.sock"
+                  hostPath: "/var/run/docker.sock"  # Docker 소켓 파일
                   mountPath: "/var/run/docker.sock"
               - hostPathVolume:
-                  hostPath: "/usr/local/bin/kubectl"
+                  hostPath: "/usr/local/bin/kubectl"  # 실제 kubectl 경로
                   mountPath: "/usr/bin/kubectl"
   crumbIssuer:
     standard:
