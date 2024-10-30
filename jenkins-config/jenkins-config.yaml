@@ -34,13 +34,6 @@ jenkins:
             containers:
               - name: "jnlp"
                 image: "jenkinsci/docker-inbound-agent:latest"  # Docker가 포함된 에이전트 이미지
-                command:
-                - "sh"
-                - "-c"
-                - |
-                  groupmod -g 1002 docker || groupadd -g 1002 docker && \
-                  usermod -aG docker jenkins && \
-                  exec /usr/local/bin/jenkins-agent
                 workingDir: "/home/jenkins"
                 args: "${computer.jnlpmac} ${computer.name}"
                 envVars:
