@@ -1,139 +1,29 @@
-jenkins:
-  agentProtocols:
-  - "JNLP4-connect"
-  - "Ping"
-  authorizationStrategy:
-    loggedInUsersCanDoAnything:
-      allowAnonymousRead: false
-  clouds:
-  - kubernetes:
-      containerCap: 10
-      containerCapStr: "10"
-      jenkinsTunnel: "jenkins-agent:50000"
-      jenkinsUrl: "http://172.18.0.100"
-      maxRequestsPerHost: 32
-      maxRequestsPerHostStr: "32"
-      name: "kubernetes"
-      namespace: "jenkins"  # Jenkins 네임스페이스로 설정
-      podLabels:
-      - key: "jenkins/jenkins-jenkins-slave"
-        value: "true"
-      serverUrl: "https://kubernetes.default"
-      templates:
-      - name: "default"
-        label: "jenkins-jenkins-slave"
-        nodeUsageMode: NORMAL
-        hostNetwork: false
-        podRetention: "never"
-        runAsUser: "1000"
-        runAsGroup: "993"
-        serviceAccount: "jenkins"
-        yamlMergeStrategy: "override"
-        containers:
-        - name: "jnlp"
-          image: "jenkins/inbound-agent:4.3-4"
-          args: "${computer.jnlpmac} ${computer.name}"
-          command: ""
-          envVars:
-          - envVar:
-              key: "JENKINS_URL"
-              value: "http://172.18.0.100"
-          livenessProbe:
-            failureThreshold: 0
-            initialDelaySeconds: 0
-            periodSeconds: 0
-            successThreshold: 0
-            timeoutSeconds: 0
-          resourceLimitCpu: "512m"
-          resourceLimitMemory: "512Mi"
-          resourceRequestCpu: "512m"
-          resourceRequestMemory: "512Mi"
-          workingDir: "/home/jenkins"
-          volumeMounts:
-          - name: "docker-binary"
-            mountPath: "/usr/bin/docker"
-            subPath: "docker"
-          - name: "docker-socket"
-            mountPath: "/var/run/docker.sock"
-          - name: "kubectl-binary"
-            mountPath: "/usr/bin/kubectl"
-            subPath: "kubectl"
-        volumes:
-        - name: "docker-binary"
-          hostPath:
-            path: "/usr/bin/docker"
-            type: File
-        - name: "docker-socket"
-          hostPath:
-            path: "/var/run/docker.sock"
-            type: Socket
-        - name: "kubectl-binary"
-          hostPath:
-            path: "/usr/local/bin/kubectl"
-            type: File
-  crumbIssuer:
-    standard:
-      excludeClientIPFromCrumb: true
-  disableRememberMe: false
-  disabledAdministrativeMonitors:
-  - "hudson.model.UpdateCenter$CoreUpdateMonitor"
-  - "jenkins.diagnostics.RootUrlNotSetMonitor"
-  - "jenkins.security.UpdateSiteWarningsMonitor"
-  labelAtoms:
-  - name: "master"
-  markupFormatter: "plainText"
-  mode: NORMAL
-  myViewsTabBar: "standard"
-  numExecutors: 2  # 노드의 익스큐터 수 설정
-  primaryView:
-    all:
-      name: "all"
-  projectNamingStrategy: "standard"
-  quietPeriod: 5
-  remotingSecurity:
-    enabled: true
-  scmCheckoutRetryCount: 0
-  securityRealm: "legacy"
-  slaveAgentPort: 50000
-  updateCenter:
-    sites:
-    - id: "default"
-      url: "https://raw.githubusercontent.com/IaC-Source/Jenkins-updateCenter/main/update-center.json"
-  views:
-  - all:
-      name: "all"
-  viewsTabBar: "standard"
-security:
-  apiToken:
-    creationOfLegacyTokenEnabled: false
-    tokenGenerationOnCreationEnabled: false
-    usageStatisticsEnabled: true
-  sSHD:
-    port: -1
-unclassified:
-  buildDiscarders:
-    configuredBuildDiscarders:
-    - "jobBuildDiscarder"
-  fingerprints:
-    fingerprintCleanupDisabled: false
-    storage: "file"
-  gitSCM:
-    createAccountBasedOnEmail: false
-    showEntireCommitSummaryInChanges: false
-    useExistingAccountWithSameEmail: false
-  junitTestResultStorage:
-    storage: "file"
-  location:
-    adminAddress: "address not configured yet <nobody@nowhere>"
-  mailer:
-    charset: "UTF-8"
-    useSsl: false
-    useTls: false
-  pollSCM:
-    pollingThreadCount: 10
-tool:
-  git:
-    installations:
-    - home: "git"
-      name: "Default"
+#!/usr/bin/env bash
 
+# Jenkins 세션 및 시간 설정
+jkopt1="--sessionTimeout=1440"
+jkopt2="--sessionEviction=86400"
+jvopt1="-Duser.timezone=Asia/Seoul"
+
+# Jenkins Configuration as Code (JCasC) 설정 경로 및 다운로드 서비스 검증 설정
+jvopt2="-Dcasc.jenkins.config=https://raw.githubusercontent.com/rednine9777/jenkins/main/jenkins-config/jenkins-config.yaml"
+jvopt3="-Dhudson.model.DownloadService.noSignatureCheck=true"
+
+# Helm을 사용하여 Jenkins 업그레이드
+helm upgrade jenkins edu/jenkins --version 2.7.1 \
+--set persistence.existingClaim=jenkins \
+--set master.adminPassword=admin \
+--set master.nodeSelector."kubernetes\.io/hostname"=kind-control-plane \
+--set master.tolerations[0].key=node-role.kubernetes.io/master \
+--set master.tolerations[0].effect=NoSchedule \
+--set master.tolerations[0].operator=Exists \
+--set master.tolerations[1].key=node-role.kubernetes.io/control-plane \
+--set master.tolerations[1].effect=NoSchedule \
+--set master.tolerations[1].operator=Exists \
+--set master.runAsUser=1000 \
+--set master.runAsGroup=1000 \
+--set master.tag=2.249.3-lts-centos7 \
+--set master.serviceType=LoadBalancer \
+--set master.servicePort=80 \
+--set master.jenkinsOpts="$jkopt1 $jkopt2" \
+--set master.javaOpts="$jvopt1 $jvopt2 $jvopt3"
