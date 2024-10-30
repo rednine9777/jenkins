@@ -29,8 +29,8 @@ jenkins:
             yamlMergeStrategy: "override"
             # 권한 설정을 위한 securityContext 추가
             securityContext:
-              runAsUser: 0       # root 사용자로 실행
-              runAsGroup: 0
+              runAsUser: 1000       # root 사용자로 실행
+              runAsGroup: 1000
             containers:
               - name: "jnlp"
                 image: "jenkinsci/docker-inbound-agent:latest"  # Docker가 포함된 에이전트 이미지
