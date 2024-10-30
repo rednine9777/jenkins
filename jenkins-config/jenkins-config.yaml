@@ -29,12 +29,22 @@ jenkins:
             yamlMergeStrategy: "override"
             # 권한 설정을 위한 securityContext 추가
             securityContext:
-              runAsUser: 1000       # root 사용자로 실행
+              runAsUser: 1000
               runAsGroup: 1000
             containers:
               - name: "jnlp"
                 image: "jenkinsci/docker-inbound-agent:latest"  # Docker가 포함된 에이전트 이미지
                 workingDir: "/home/jenkins"
+                command:
+                  - "sh"
+                  - "-c"
+                  - |
+                    # docker 그룹의 GID를 호스트와 맞추고 jenkins 사용자를 추가
+                    DOCKER_GID=$(stat -c '%g' /var/run/docker.sock) && \
+                    groupadd -for -g ${DOCKER_GID} docker && \
+                    usermod -aG docker jenkins && \
+                    # Jenkins 에이전트 실행
+                    exec /usr/local/bin/jenkins-agent
                 args: "${computer.jnlpmac} ${computer.name}"
                 envVars:
                   - envVar:
@@ -44,13 +54,25 @@ jenkins:
                 resourceLimitMemory: "512Mi"
                 resourceRequestCpu: "512m"
                 resourceRequestMemory: "512Mi"
+                volumeMounts:
+                  - name: "docker-sock"
+                    mountPath: "/var/run/docker.sock"
+                  - name: "kubectl"
+                    mountPath: "/usr/bin/kubectl"
+                  # 필요한 경우 에이전트 파드에 PVC 마운트 추가
+                  - name: "jenkins-pvc"
+                    mountPath: "/home/jenkins"
             volumes:
-              - hostPathVolume:
-                  hostPath: "/var/run/docker.sock"  # Docker 소켓 파일
-                  mountPath: "/var/run/docker.sock"
-              - hostPathVolume:
-                  hostPath: "/usr/local/bin/kubectl"  # 실제 kubectl 경로
-                  mountPath: "/usr/bin/kubectl"
+              - name: "docker-sock"
+                hostPath:
+                  path: "/var/run/docker.sock"
+              - name: "kubectl"
+                hostPath:
+                  path: "/usr/local/bin/kubectl"
+              # 에이전트 파드에 PVC 마운트를 위한 볼륨 정의
+              - name: "jenkins-pvc"
+                persistentVolumeClaim:
+                  claimName: "jenkins"
   crumbIssuer:
     standard:
       excludeClientIPFromCrumb: true
