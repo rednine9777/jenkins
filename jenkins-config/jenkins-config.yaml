@@ -54,7 +54,7 @@ jenkins:
             mountPath: "/usr/bin/kubectl"
         - hostPathVolume:
             hostPath: "/usr/bin/docker"  # Docker 경로
-            mountPath: "/bin/docker"
+            mountPath: "/usr/bin/docker"
         - hostPathVolume:
             hostPath: "/var/run/docker.sock"  # Docker 소켓 파일
             mountPath: "/var/run/docker.sock"
