@@ -21,17 +21,15 @@ jenkins:
         serverUrl: "https://kubernetes.default"
         templates:
           - name: "default"
-            label: "jenkins-jenkins-slave"  # 공백 제거
+            label: "jenkins-jenkins-slave"
             serviceAccount: "jenkins"
             nodeUsageMode: NORMAL
             podRetention: "never"
             hostNetwork: false
             yamlMergeStrategy: "override"
-            # 권한 문제 해결을 위한 securityContext 추가
             securityContext:
-              runAsUser: 1000       # jenkins 사용자 ID
-              runAsGroup: 1000      # jenkins 그룹 ID
-              fsGroup: 993          # 호스트의 docker 그룹 GID (993)
+              runAsUser: 1000
+              runAsGroup: 1000
             containers:
               - name: "jnlp"
                 image: "jenkins/inbound-agent:4.3-4"
@@ -40,16 +38,11 @@ jenkins:
                   - "sh"
                   - "-c"
                   - |
-                    # 호스트의 docker 그룹 GID를 가져옵니다.
-                    DOCKER_GID=$(stat -c '%g' /var/run/docker.sock) && \
-                    # docker 그룹을 생성합니다.
-                    groupadd -for -g ${DOCKER_GID} docker && \
-                    # jenkins 사용자를 docker 그룹에 추가합니다.
-                    usermod -aG docker jenkins && \
-                    # 필요한 라이브러리를 설치합니다.
                     apt-get update && \
-                    apt-get install -y libltdl7 && \
-                    # 에이전트 프로세스를 실행합니다.
+                    apt-get install -y docker.io && \
+                    DOCKER_GID=$(stat -c '%g' /var/run/docker.sock) && \
+                    groupadd -for -g ${DOCKER_GID} docker && \
+                    usermod -aG docker jenkins && \
                     exec /usr/local/bin/jenkins-agent "\${computer.jnlpmac}" "\${computer.name}"
                 args: ""
                 envVars:
@@ -62,14 +55,11 @@ jenkins:
                 resourceRequestMemory: "512Mi"
             volumes:
               - hostPathVolume:
-                  hostPath: "/usr/local/bin/kubectl"  # 실제 kubectl 경로
-                  mountPath: "/usr/bin/kubectl"
-              - hostPathVolume:
-                  hostPath: "/usr/bin/docker"  # Docker 경로
-                  mountPath: "/usr/bin/docker"
-              - hostPathVolume:
-                  hostPath: "/var/run/docker.sock"  # Docker 소켓 파일
+                  hostPath: "/var/run/docker.sock"
                   mountPath: "/var/run/docker.sock"
+              - hostPathVolume:
+                  hostPath: "/usr/local/bin/kubectl"
+                  mountPath: "/usr/bin/kubectl"
   crumbIssuer:
     standard:
       excludeClientIPFromCrumb: true
@@ -135,4 +125,3 @@ tool:
     installations:
       - home: "git"
         name: "Default"
-
