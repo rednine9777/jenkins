@@ -30,10 +30,10 @@ jenkins:
               key: "JENKINS_URL"
               value: "http://172.18.0.100:80"
           image: "jenkins/inbound-agent:4.3-4"
-          securityContext:
-            runAsUser: 1000
-            runAsGroup: 993
-            fsGroup: 993
+          # securityContext:
+            # runAsUser: 1000
+            # runAsGroup: 1002
+            # fsGroup: 1002
           #   privileged: true  # Docker 접근 권한 부여
           livenessProbe:
             failureThreshold: 0
