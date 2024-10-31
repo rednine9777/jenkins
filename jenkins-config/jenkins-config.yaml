@@ -1,81 +1,78 @@
 jenkins:
   agentProtocols:
-    - "JNLP4-connect"
-    - "Ping"
+  - "JNLP4-connect"
+  - "Ping"
   authorizationStrategy:
     loggedInUsersCanDoAnything:
       allowAnonymousRead: false
   clouds:
-    - kubernetes:
-        containerCap: 10
-        containerCapStr: "10"
-        jenkinsTunnel: "172.18.0.100:50000"  # 수정된 jenkinsTunnel
-        jenkinsUrl: "http://172.18.0.100:80"  # 수정된 jenkinsUrl
-        maxRequestsPerHost: 32
-        maxRequestsPerHostStr: "32"
-        name: "kubernetes"
-        namespace: "default"
-        podLabels:
-          - key: "jenkins/jenkins-jenkins-slave"
-            value: "true"
-        serverUrl: "https://kubernetes.default"
-        templates:
-          - containers:
-              - args: "^${computer.jnlpmac} ^${computer.name}"
-                command: ""
-                envVars:
-                  - envVar:
-                      key: "JENKINS_URL"
-                      value: "http://172.18.0.100:80"  # 수정된 JENKINS_URL
-                image: "jenkins/inbound-agent:4.3-4"
-                livenessProbe:
-                  failureThreshold: 0
-                  initialDelaySeconds: 0
-                  periodSeconds: 0
-                  successThreshold: 0
-                  timeoutSeconds: 0
-                name: "jnlp"
-                resourceLimitCpu: "512m"
-                resourceLimitMemory: "512Mi"
-                resourceRequestCpu: "512m"
-                resourceRequestMemory: "512Mi"
-                workingDir: "/home/jenkins"
-            hostNetwork: false
-            label: "jenkins-jenkins-slave"
-            name: "default"
-            nodeUsageMode: NORMAL
-            podRetention: "never"
-            runAsGroup: "993"
-            runAsUser: "1000"
-            serviceAccount: "jenkins"
-            volumes:
-              - hostPathVolume:
-                  hostPath: "/usr/bin/kubectl"
-                  mountPath: "/usr/bin/kubectl"
-              - hostPathVolume:
-                  hostPath: "/bin/docker"
-                  mountPath: "/bin/docker"
-              - hostPathVolume:
-                  hostPath: "/var/run/docker.sock"
-                  mountPath: "/var/run/docker.sock"
-              - persistentVolumeClaim:
-                  claimName: jenkins
-                mountPath: "/var/jenkins_home"
-            yamlMergeStrategy: "override"
+  - kubernetes:
+      containerCap: 10
+      containerCapStr: "10"
+      jenkinsTunnel: "jenkins-agent:50000"
+      jenkinsUrl: "http://jenkins:80"
+      maxRequestsPerHost: 32
+      maxRequestsPerHostStr: "32"
+      name: "kubernetes"
+      namespace: "jenkins"
+      podLabels:
+      - key: "jenkins/jenkins-jenkins-slave"
+        value: "true"
+      serverUrl: "https://kubernetes.default"
+      templates:
+      - containers:
+        - args: "^${computer.jnlpmac} ^${computer.name}"
+          command: ""
+          envVars:
+          - envVar:
+              key: "JENKINS_URL"
+              value: "http://172.18.0.100"
+          image: "jenkins/inbound-agent:4.3-4"
+          livenessProbe:
+            failureThreshold: 0
+            initialDelaySeconds: 0
+            periodSeconds: 0
+            successThreshold: 0
+            timeoutSeconds: 0
+          name: "jnlp"
+          resourceLimitCpu: "512m"
+          resourceLimitMemory: "512Mi"
+          resourceRequestCpu: "512m"
+          resourceRequestMemory: "512Mi"
+          workingDir: "/home/jenkins"
+        hostNetwork: false
+        label: "jenkins-jenkins-slave "
+        name: "default"
+        nodeUsageMode: NORMAL
+        podRetention: "never"
+        runAsGroup: "993"
+        runAsUser: "1000"
+        serviceAccount: "jenkins"
+        volumes:
+        - hostPathVolume:
+            hostPath: "/usr/local/bin//kubectl"
+            mountPath: "/usr/local/bin//kubectl"
+        - hostPathVolume:
+            hostPath: "/usr/bin/docker"
+            mountPath: "/usr/bin/docker"
+        - hostPathVolume:
+            hostPath: "/var/run/docker.sock"
+            mountPath: "/var/run/docker.sock"
+        yamlMergeStrategy: "override"
   crumbIssuer:
     standard:
       excludeClientIPFromCrumb: true
   disableRememberMe: false
   disabledAdministrativeMonitors:
-    - "hudson.model.UpdateCenter$CoreUpdateMonitor"
-    - "jenkins.diagnostics.RootUrlNotSetMonitor"
-    - "jenkins.security.UpdateSiteWarningsMonitor"
+  - "hudson.model.UpdateCenter$CoreUpdateMonitor"
+  - "jenkins.diagnostics.RootUrlNotSetMonitor"
+  - "jenkins.security.UpdateSiteWarningsMonitor"  
   labelAtoms:
-    - name: "master"
+  - name: "master"
   markupFormatter: "plainText"
   mode: NORMAL
   myViewsTabBar: "standard"
-  numExecutors: 0
+  numExecutors: 2
   primaryView:
     all:
       name: "all"
@@ -88,11 +85,11 @@ jenkins:
   slaveAgentPort: 50000
   updateCenter:
     sites:
-      - id: "default"
-        url: "https://raw.githubusercontent.com/IaC-Source/Jenkins-updateCenter/main/update-center.json"
+    - id: "default"
+      url: "https://raw.githubusercontent.com/IaC-Source/Jenkins-updateCenter/main/update-center.json"
   views:
-    - all:
-        name: "all"
+  - all:
+      name: "all"
   viewsTabBar: "standard"
 security:
   apiToken:
@@ -104,7 +101,7 @@ security:
 unclassified:
   buildDiscarders:
     configuredBuildDiscarders:
-      - "jobBuildDiscarder"
+    - "jobBuildDiscarder"
   fingerprints:
     fingerprintCleanupDisabled: false
     storage: "file"
@@ -125,5 +122,5 @@ unclassified:
 tool:
   git:
     installations:
-      - home: "git"
-        name: "Default"
+    - home: "git"
+      name: "Default"
