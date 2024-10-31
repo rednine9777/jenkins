@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-nfs-access
+  namespace: default
+spec:
+  containers:
+    - name: test-nfs-access
+      image: ubuntu
+      command: ["sh", "-c", "apt update && apt install -y nfs-common && mkdir -p /mnt && mount -o nolock 172.18.0.1:/nfs_shared/jenkins /mnt && ls /mnt"]
+  dnsPolicy: "None"
+  dnsConfig:
+    nameservers:
+      - 8.8.8.8
+      - 8.8.4.4
+

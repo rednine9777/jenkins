@@ -10,7 +10,7 @@ spec:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
   nfs:
-    server: 172.20.0.1  # 수정된 NFS 서버 IP
+    server: 172.18.0.1  # 수정된 NFS 서버 IP
     path: /nfs_shared/jenkins
   mountOptions:
     - vers=4
