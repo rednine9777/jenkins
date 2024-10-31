@@ -20,8 +20,8 @@ jenkins:
         value: "true"
       serverUrl: "https://kubernetes.default"
       templates:
-      - name: "default"  # 템플릿 이름
-        label: "jenkins-jenkins-slave"  # 공백 제거
+      - name: "default"  # Template name
+        label: "jenkins-jenkins-slave"
         containers:
         - args: "^${computer.jnlpmac} ^${computer.name}"
           command: ""
@@ -31,7 +31,7 @@ jenkins:
               value: "http://172.18.0.100:80"
           image: "jenkins/inbound-agent:4.3-4"
           # securityContext:
-          #   privileged: true  # Docker 접근 권한 부여
+          #   privileged: true
           livenessProbe:
             failureThreshold: 0
             initialDelaySeconds: 0
@@ -44,16 +44,15 @@ jenkins:
           resourceRequestCpu: "512m"
           resourceRequestMemory: "512Mi"
           workingDir: "/home/jenkins"
-          volumes:
-            - hostPathVolume:
-                hostPath: "/usr/local/bin/kubectl"
-                mountPath: "/usr/local/bin/kubectl"
-            - hostPathVolume:
-                hostPath: "/usr/bin/docker"
-                mountPath: "/usr/bin/docker"
-            - hostPathVolume:
-                hostPath: "/var/run/docker.sock"
-                mountPath: "/var/run/docker.sock"
+          volumeMounts:
+          - mountPath: "/var/jenkins_home"
+            name: "jenkins-pvc"  # PVC name for Jenkins data
+          - mountPath: "/var/run/docker.sock"
+            name: "docker-sock-volume"
+          - mountPath: "/usr/bin/docker"
+            name: "docker-cli-volume"
+          - mountPath: "/usr/local/bin/kubectl"
+            name: "kubectl-volume"
         hostNetwork: false
         nodeUsageMode: NORMAL
         podRetention: "never"
@@ -61,15 +60,18 @@ jenkins:
         runAsUser: "1000"
         serviceAccount: "jenkins"
         volumes:
-        - name: "docker-sock-volume"        # 볼륨 정의 추가
+        - name: "jenkins-pvc"
+          persistentVolumeClaim:
+            claimName: "jenkins"  # Use existing PVC bound to NFS
+        - name: "docker-sock-volume"
           hostPath:
             path: "/var/run/docker.sock"
-        - name: "kubectl-volume"
-          hostPath:
-            path: "/usr/local/bin/kubectl"
         - name: "docker-cli-volume"
           hostPath:
             path: "/usr/bin/docker"
+        - name: "kubectl-volume"
+          hostPath:
+            path: "/usr/local/bin/kubectl"
         yamlMergeStrategy: "override"
   crumbIssuer:
     standard:
@@ -78,7 +80,7 @@ jenkins:
   disabledAdministrativeMonitors:
   - "hudson.model.UpdateCenter$CoreUpdateMonitor"
   - "jenkins.diagnostics.RootUrlNotSetMonitor"
-  - "jenkins.security.UpdateSiteWarningsMonitor"  
+  - "jenkins.security.UpdateSiteWarningsMonitor"
   labelAtoms:
   - name: "master"
   markupFormatter: "plainText"
