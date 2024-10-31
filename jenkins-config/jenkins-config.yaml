@@ -44,13 +44,16 @@ jenkins:
           resourceRequestCpu: "512m"
           resourceRequestMemory: "512Mi"
           workingDir: "/home/jenkins"
-          volumeMounts:    # 볼륨 마운트 추가
-          - name: "docker-sock-volume"
-            mountPath: "/var/run/docker.sock"
-          - name: "kubectl-volume"
-            mountPath: "/usr/local/bin/kubectl"
-          - name: "docker-cli-volume"
-            mountPath: "/usr/bin/docker"
+          volumes:
+            - hostPathVolume:
+                hostPath: "/usr/local/bin/kubectl"
+                mountPath: "/usr/local/bin/kubectl"
+            - hostPathVolume:
+                hostPath: "/usr/bin/docker"
+                mountPath: "/usr/bin/docker"
+            - hostPathVolume:
+                hostPath: "/var/run/docker.sock"
+                mountPath: "/var/run/docker.sock"
         hostNetwork: false
         nodeUsageMode: NORMAL
         podRetention: "never"
