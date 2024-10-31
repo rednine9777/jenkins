@@ -29,8 +29,7 @@ jenkins:
           - envVar:
               key: "JENKINS_URL"
               value: "http://172.18.0.100:80"
-          # image: "jenkins/inbound-agent:4.3-4"
-          image: anyssido/jenkins-inbound-docker-agent
+          image: "jenkins/inbound-agent:4.3-4"
           # securityContext:
             # runAsUser: 1000
             # runAsGroup: 1002
