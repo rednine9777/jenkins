@@ -21,7 +21,7 @@ helm install jenkins edu/jenkins --version 2.7.1 \
 --set master.tolerations[1].effect=NoSchedule \
 --set master.tolerations[1].operator=Exists \
 --set master.runAsUser=1000 \
---set master.runAsGroup=993
+--set master.runAsGroup=993 \
 --set master.tag=2.249.3-lts-centos7 \
 --set master.serviceType=LoadBalancer \
 --set master.servicePort=80 \

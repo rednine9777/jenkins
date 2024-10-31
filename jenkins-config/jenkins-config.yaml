@@ -9,8 +9,8 @@ jenkins:
     - kubernetes:
         containerCap: 10
         containerCapStr: "10"
-        jenkinsTunnel: "jenkins-agent:50000"
-        jenkinsUrl: "http://jenkins:80"
+        jenkinsTunnel: "172.18.0.100:50000"  # 수정된 jenkinsTunnel
+        jenkinsUrl: "http://172.18.0.100:80"  # 수정된 jenkinsUrl
         maxRequestsPerHost: 32
         maxRequestsPerHostStr: "32"
         name: "kubernetes"
@@ -26,7 +26,7 @@ jenkins:
                 envVars:
                   - envVar:
                       key: "JENKINS_URL"
-                      value: "http://jenkins:80"
+                      value: "http://172.18.0.100:80"  # 수정된 JENKINS_URL
                 image: "jenkins/inbound-agent:4.3-4"
                 livenessProbe:
                   failureThreshold: 0
@@ -59,7 +59,7 @@ jenkins:
                   hostPath: "/var/run/docker.sock"
                   mountPath: "/var/run/docker.sock"
               - persistentVolumeClaim:
-                  claimName: jenkins-pvc
+                  claimName: jenkins
                 mountPath: "/var/jenkins_home"
             yamlMergeStrategy: "override"
   crumbIssuer:
