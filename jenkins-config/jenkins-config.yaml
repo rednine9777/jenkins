@@ -20,13 +20,15 @@ jenkins:
         value: "true"
       serverUrl: "https://kubernetes.default"
       templates:
-      - containers:
+      - name: "default"  # 템플릿 이름
+        label: "jenkins-jenkins-slave"  # 공백 제거
+        containers:
         - args: "^${computer.jnlpmac} ^${computer.name}"
           command: ""
           envVars:
           - envVar:
               key: "JENKINS_URL"
-              value: "http://172.18.0.100"
+              value: "http://jenkins:80"
           image: "jenkins/inbound-agent:4.3-4"
           livenessProbe:
             failureThreshold: 0
@@ -41,8 +43,6 @@ jenkins:
           resourceRequestMemory: "512Mi"
           workingDir: "/home/jenkins"
         hostNetwork: false
-        label: "jenkins-jenkins-slave "
-        name: "default"
         nodeUsageMode: NORMAL
         podRetention: "never"
         runAsGroup: "993"
