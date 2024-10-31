@@ -20,8 +20,8 @@ jenkins:
         value: "true"
       serverUrl: "https://kubernetes.default"
       templates:
-      - name: "default"
-        label: "jenkins-jenkins-slave"
+      - name: "default"  # 템플릿 이름
+        label: "jenkins-jenkins-slave"  # 공백 제거
         containers:
         - args: "^${computer.jnlpmac} ^${computer.name}"
           command: ""
@@ -30,9 +30,8 @@ jenkins:
               key: "JENKINS_URL"
               value: "http://172.18.0.100:80"
           image: "jenkins/inbound-agent:4.3-4"
-          # Uncomment if elevated permissions are needed
           # securityContext:
-          #   privileged: true
+          #   privileged: true  # Docker 접근 권한 부여
           livenessProbe:
             failureThreshold: 0
             initialDelaySeconds: 0
@@ -52,15 +51,15 @@ jenkins:
         runAsUser: "1000"
         serviceAccount: "jenkins"
         volumes:
-        - name: "kubectl-volume"
-          hostPath:
-            path: "/usr/local/bin/kubectl"
-        - name: "docker-cli-volume"
-          hostPath:
-            path: "/usr/bin/docker"
-        - name: "docker-sock-volume"
-          hostPath:
-            path: "/var/run/docker.sock"
+        - hostPathVolume:
+            hostPath: "/usr/local/bin/kubectl"
+            mountPath: "/usr/local/bin//kubectl"
+        - hostPathVolume:
+            hostPath: "/usr/bin/docker"
+            mountPath: "/usr/bin/docker"
+        - hostPathVolume:
+            hostPath: "/var/run/docker.sock"
+            mountPath: "/var/run/docker.sock"
         yamlMergeStrategy: "override"
   crumbIssuer:
     standard:
@@ -69,7 +68,7 @@ jenkins:
   disabledAdministrativeMonitors:
   - "hudson.model.UpdateCenter$CoreUpdateMonitor"
   - "jenkins.diagnostics.RootUrlNotSetMonitor"
-  - "jenkins.security.UpdateSiteWarningsMonitor"
+  - "jenkins.security.UpdateSiteWarningsMonitor"  
   labelAtoms:
   - name: "master"
   markupFormatter: "plainText"
