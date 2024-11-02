@@ -1,16 +1,27 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: test-nfs-access
-  namespace: default
+  name: test-pod
 spec:
+  serviceAccountName: jenkins  # 이 부분을 추가하여 jenkins 서비스 계정을 사용
   containers:
-    - name: test-nfs-access
-      image: ubuntu
-      command: ["sh", "-c", "apt update && apt install -y nfs-common && mkdir -p /mnt && mount -o nolock 172.18.0.1:/nfs_shared/jenkins /mnt && ls /mnt"]
-  dnsPolicy: "None"
-  dnsConfig:
-    nameservers:
-      - 8.8.8.8
-      - 8.8.4.4
-
+  - name: test-container
+    image: ubuntu
+    command: ["sleep", "infinity"]  # 컨테이너를 계속 실행 상태로 유지
+    volumeMounts:
+    - name: docker-sock
+      mountPath: /var/run/docker.sock
+    - name: docker-binary
+      mountPath: /usr/bin/docker
+    - name: kubectl-binary
+      mountPath: /usr/local/bin/kubectl
+  volumes:
+  - name: docker-sock
+    hostPath:
+      path: /var/run/docker.sock
+  - name: docker-binary
+    hostPath:
+      path: /usr/bin/docker
+  - name: kubectl-binary
+    hostPath:
+      path: /usr/local/bin/kubectl

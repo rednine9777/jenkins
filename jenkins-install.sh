@@ -7,6 +7,7 @@ jvopt1="-Duser.timezone=Asia/Seoul"
 
 # Jenkins Configuration as Code (JCasC) 설정 경로 및 다운로드 서비스 검증 설정
 jvopt2="-Dcasc.jenkins.config=https://raw.githubusercontent.com/rednine9777/jenkins/main/jenkins-config/jenkins-config.yaml"
+# jvopt2="-Dcasc.jenkins.config=file:///home/aki/01-GOORM/STUDY/Kube/JENKINS/jenkins-config/jenkins-config.yaml"
 jvopt3="-Dhudson.model.DownloadService.noSignatureCheck=true"
 
 # Helm을 사용하여 Jenkins 설치
@@ -27,4 +28,7 @@ helm install jenkins edu/jenkins --version 2.7.1 \
 --set master.serviceType=LoadBalancer \
 --set master.servicePort=80 \
 --set master.jenkinsOpts="$jkopt1 $jkopt2" \
---set master.javaOpts="$jvopt1 $jvopt2 $jvopt3"
+--set master.javaOpts="$jvopt1 $jvopt2 $jvopt3" \
+# --set agent.runAsUser=1000 \
+# --set agent.runAsGroup=1002 \
+# --set agent.fsGroup=1002
